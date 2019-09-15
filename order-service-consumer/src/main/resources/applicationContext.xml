@@ -13,10 +13,27 @@
     <dubbo:application name="order-service-consumer"/>
 
     <!-- 使用zookeeper广播注册中心暴露发现服务地址 -->
-    <dubbo:registry protocol="zookeeper" address="120.77.237.175:9181" />
+    <dubbo:registry protocol="zookeeper" address="120.77.237.175:9181"/>
 
-    <!-- 生成远程服务代理 服务消费者引用服务配置-->
-    <dubbo:reference id="userService" interface="com.gmall.service.UserService" />
+    <!-- 生成远程服务代理 服务消费者引用服务配置 check=false关闭服务的启动时检查 (没有提供者时报错)：-->
+    <!-- 
+		1）、精确优先 (方法级优先，接口级次之，全局配置再次之)
+		2）、消费者设置优先(如果级别一样，则消费方优先，提供方次之)
+	-->
+    <!-- timeout默认是1000ms-->
+    <!--指定接口以及特定方法超时配置-->
+    <!-- retries="":重试次数，不包含第一次调用，0代表不重试-->
+    <!-- 幂等（设置重试次数）【查询、删除、修改】、非幂等（不能设置重试次数）【新增】 -->
+    <!--可通过指定version来指定调用哪个版本的服务,也可以通过*来随机调用-->
+    <dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000" retries="3" version="2.0.0" stub="com.gmall.service.impl.UserServiceSub">
+       <!-- <dubbo:method name="getUserAddressList" timeout="1000" retries="3"/>-->
+    </dubbo:reference>
+    <!--全局超时配置-->
+    <!--<dubbo:consumer timeout="1000" retries="3"/>-->
+
+    <!--关闭消费者所有服务的启动时检查 (没有提供者时报错)：-->
+    <!--<dubbo:consumer check="false"/>-->
+
 
     <!-- 连接监控中心 -->
     <dubbo:monitor protocol="registry" />

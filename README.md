@@ -61,236 +61,70 @@ Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Ja
 - 服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。
 
 
-**工程架构**
+**整合Spring工程架构**
 
-**gmall-interface(公共接口层)**
+[**gmall-interface(公共接口层)**](https://github.com/DragonChilde/Dubbo/tree/master/gmall-interface)
 
-所有公共接口层（model，service，exception…）
+[**order-service-consumer(订单服务模块)(消费接口)**](https://github.com/DragonChilde/Dubbo/tree/master/order-service-consumer)
 
-**Bean模型**
+[**user-service-provider(用户服务模块)(服务接口)**](https://github.com/DragonChilde/Dubbo/tree/master/user-service-provider)
 
-	public class UserAddress implements Serializable {
-	    private Integer id;
-	    private String userAddress; //用户地址
-	    private String userId; //用户id
-	    private String consignee; //收货人
-	    private String phoneNum; //电话号码
-	    private String isDefault; //是否为默认地址    Y-是     N-否
-	
-	    public UserAddress() {
-	        super();
-	        // TODO Auto-generated constructor stub
-	    }
-	
-	    public UserAddress(Integer id, String userAddress, String userId, String consignee, String phoneNum,
-	                       String isDefault) {
-	        super();
-	        this.id = id;
-	        this.userAddress = userAddress;
-	        this.userId = userId;
-	        this.consignee = consignee;
-	        this.phoneNum = phoneNum;
-	        this.isDefault = isDefault;
-	    }
-	
-	    public Integer getId() {
-	        return id;
-	    }
-	    public void setId(Integer id) {
-	        this.id = id;
-	    }
-	    public String getUserAddress() {
-	        return userAddress;
-	    }
-	    public void setUserAddress(String userAddress) {
-	        this.userAddress = userAddress;
-	    }
-	    public String getUserId() {
-	        return userId;
-	    }
-	    public void setUserId(String userId) {
-	        this.userId = userId;
-	    }
-	    public String getConsignee() {
-	        return consignee;
-	    }
-	    public void setConsignee(String consignee) {
-	        this.consignee = consignee;
-	    }
-	    public String getPhoneNum() {
-	        return phoneNum;
-	    }
-	    public void setPhoneNum(String phoneNum) {
-	        this.phoneNum = phoneNum;
-	    }
-	    public String getIsDefault() {
-	        return isDefault;
-	    }
-	    public void setIsDefault(String isDefault) {
-	        this.isDefault = isDefault;
-	    }
-	
-	}
+[**整合SpringBoot**](https://github.com/apache/dubbo-spring-boot-project/blob/0.2.x/README_CN.md)
 
-**Server接口**
-	
-	<!--初始化OrderService-->
-	public interface OrderService {
-	    /**
-	     * 初始化订单
-	     * @param userId
-	     * @return List<UserAddress>
-	     */
-	    public List<UserAddress> initOrder(String userId);
-	}
-
-	<!--初始化UserService-->
-	public interface UserService {
-	    /**
-	     * 按照用户id返回所有的收货地址
-	     * @param userId
-	     * @return List<UserAddress>
-	     */
-	    public List<UserAddress> getUserAddressList(String userId);
-	}
-
-
-**order-service-consumer(订单服务模块)(消费接口)**
-
-**pom.xml**
-
-	 <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-
-    <dependencies>
+ 	<!-- Dubbo Spring Boot Starter -->
         <dependency>
-            <groupId>dubbo</groupId>
-            <artifactId>gmall-interface</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+            <version>0.2.1</version>
         </dependency>
-        <!-- 由于我们使用zookeeper作为注册中心，所以需要操作zookeeper
-        dubbo 2.6以前的版本引入zkclient操作zookeeper
-        dubbo 2.6及以后的版本引入curator操作zookeeper
-        下面两个zk客户端根据dubbo版本2选1即可
-        -->
-        <!--
-        <dependency>
-			<groupId>com.101tec</groupId>
-			<artifactId>zkclient</artifactId>
-			<version>0.10</version>
-		</dependency>
 
-        -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-            <version>2.6.2</version>
-        </dependency>
-        <!-- curator-framework -->
-        <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-framework</artifactId>
-            <version>2.12.0</version>
-        </dependency>
-    </dependencies>
+注意:SpringBoot2.1.x以上要用0.2.1版本,以下用0.1.1版本
 
-**applicationContext.xml**
+**dubbo注解@Service、@Reference**
 
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
-	       xmlns:context="http://www.springframework.org/schema/context"
-	       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd
-			http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+**如果没有在配置中写dubbo.scan.base-package,还需要使用@EnableDubbo注解**
+
+
+**boot-order-service-consumer消费端**
+
+
+
+**boot-user-service-provider服务端**
+
+application.properties
+
+	#端口号
+	server.port=9002
+
+	#是服务名，不能跟别的dubbo提供端重复
+	dubbo.application.name=boot-user-service-provider
+	#指定注册中心协议
+	dubbo.registry.protocol=zookeeper
+	#注册中心的地址加端口号
+	dubbo.registry.address=120.77.237.175:9181
+	#dubbo.protocol.port=20882
+	#分布式固定是dubbo,不要改
+	dubbo.protocol.name=dubbo
+	#注解方式要扫描的包
+	dubbo.scan.base-packages=com.dubbo.bootuserserviceprovider
+
+
+实现 Dubbo 服务提供方
+
+	package com.dubbo.bootuserserviceprovider.service.impl;
+
+	import com.alibaba.dubbo.config.annotation.Service;
+	import com.gmall.bean.UserAddress;
+	import com.gmall.service.UserService;
+	import org.springframework.stereotype.Component;
 	
-		!--自动扫包-->
-	    <context:component-scan base-package="com.gmall.service.impl" />
-	
-	    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
-	    <dubbo:application name="order-service-consumer"/>
-	
-	    <!-- 使用zookeeper广播注册中心暴露发现服务地址 -->
-	    <dubbo:registry protocol="zookeeper" address="120.77.237.175:9181" />
-	
-	    <!-- 生成远程服务代理，服务消费者引用服务配置 -->
-	    <dubbo:reference id="userService" interface="com.gmall.service.UserService" />
-	</beans>
+	import java.util.Arrays;
+	import java.util.List;
 
-**实现OrderService**
-
+	/**这里的dubbo @Service注解避免与spring的注解冲突，所以spring用了@Component指明***/
+	/**暴露服务接口**/
 	@Service
-	public class OrderServiceImpl implements OrderService {
-	
-	    @Autowired
-	    UserService userService;
-	
-	    @Override
-	    public List<UserAddress> initOrder(String userId) {
-	        // TODO Auto-generated method stub
-	        System.out.println("用户id："+userId);
-	        //1、查询用户的收货地址
-	        List<UserAddress> addressList = userService.getUserAddressList(userId);
-	        for (UserAddress userAddress : addressList) {
-	            System.out.println(userAddress.getUserAddress());
-	        }
-	        return addressList;
-	    }
-	}
-
-**测试消费者**
-
-	public class ConsumerApplication {
-	    public static void main(String[] args) {
-	        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
-	        OrderService orderService = context.getBean(OrderService.class);
-	        orderService.initOrder("1");
-	        System.out.println("success!");
-	
-	    }
-	}
-**user-service-provider(用户服务模块)(服务接口)**
-
-pom文件一样
-
-**applicationContext.xml**
-
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-	       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd	http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd
-			http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
-	
-	    <!-- 1、指定当前服务/应用的名字（同样的服务名字相同，不要和别的服务同名） -->
-	    <dubbo:application name="user-service-provider" />
-	
-	    <!-- 2、指定注册中心的位置(两种写法一样) -->
-	    <!--<dubbo:registry address="zookeeper://120.77.237.175:9181" />-->
-	    <dubbo:registry protocol="zookeeper" address="120.77.237.175:9181" />
-	
-	    <!-- 3、指定通信规则（通信协议/通信端口） -->
-	    <dubbo:protocol name="dubbo" port="20882"/>
-	
-	    <!-- 4、暴露服务   ref：指向服务的真正的实现对象 -->
-	    <dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl"/>
-	
-	    <!-- 5 和本地bean一样实现服务 -->
-	    <bean id="userServiceImpl" class="com.gmall.service.impl.UserServiceImpl"/>
-	</beans>
-
-**实现UserService**
-
-	/**
-	 *  * 1、将服务提供者注册到注册中心（暴露服务）
-	 *  * 		1）、导入dubbo依赖（2.6.2）\操作zookeeper的客户端(curator)
-	 *  * 		2）、配置服务提供者
-	 *  *
-	 *  * 2、让服务消费者去注册中心订阅服务提供者的服务地址
-	 */
+	@Component
 	public class UserServiceImpl implements UserService {
 	    @Override
 	    public List<UserAddress> getUserAddressList(String userId) {
@@ -300,12 +134,139 @@ pom文件一样
 	    }
 	}
 
-**开启服务提供者测试**
+# Dubbo配置 #
 
-	public class ProviderApplication {
-	    public static void main(String[] args) throws Exception {
-	        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
-	        context.start();
-	        System.in.read();
+**1. 配置原则**
+
+![](https://img-blog.csdnimg.cn/20181031220111268.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3l6MzU3ODIzNjY5,size_16,color_FFFFFF,t_70)
+
+- JVM 启动 -D 参数优先，这样可以使用户在部署和启动时进行参数重写，比如在启动时需改变协议的端口。
+- XML 次之，如果在 XML 中有配置，则 dubbo.properties 中的相应配置项无效。
+- Properties 最后，相当于缺省值，只有 XML 没有配置时，dubbo.properties 的相应配置项才会生效，通常用于共享公共配置，比如应用名。
+
+**启动时检查**
+
+Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止 Spring 初始化完成，以便上线时，能及早发现问题，默认 check="true"。
+
+**通过 spring 配置文件**：
+
+- 关闭某个服务的启动时检查 (没有提供者时报错)：
+
+		<dubbo:reference interface="com.foo.BarService" check="false" />
+
+- 关闭所有服务的启动时检查 (没有提供者时报错)：
+
+		<dubbo:consumer check="false" />
+- 关闭注册中心启动时检查 (注册订阅失败时报错)：
+
+		<dubbo:registry check="false" />
+	
+**2. 重试次数**
+
+失败自动切换，当出现失败，重试其它服务器，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次，一共连接三次)
+
+	    <!-- retries="":重试次数，不包含第一次调用，0代表不重试-->
+   		 <!-- 幂等（设置重试次数）【查询、删除、修改】、非幂等（不能设置重试次数）【新增】 -->
+	    <dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000" retries="3">
+        	<dubbo:method name="getUserAddressList" timeout="1000" retries="3"/>
+	    </dubbo:reference>
+	    <!--全局超时配置-->
+	    <dubbo:consumer timeout="1000" retries="3"/>
+
+**假如同时有多个服务方(不同的端口),这时重试不会只连同一个服务端，会多个服务端都尝试连接**
+
+**3. 超时时间**
+
+由于网络或服务端不可靠，会导致调用出现一种不确定的中间状态（超时）。为了避免超时导致客户端资源（线程）挂起耗尽，必须设置超时时间。
+
+**order-service-consumer(消费端)**
+
+    <!-- timeout默认是1000ms-->
+	<!--指定接口或者特定方法超时配置-->
+    <dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000">
+        <dubbo:method name="getUserAddressList" timeout="5000"/>
+    </dubbo:reference>
+	<!--全局超时配置-->
+    <dubbo:consumer timeout="1000"/>
+
+**user-service-provider(服务端)**
+
+	<!--指定接口或者特定方法超时配置-->
+	<dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl" timeout="1000">
+        <dubbo:method name="getUserAddressList" timeout="5000"/>
+    </dubbo:service>
+	<!--全局超时配置-->
+    <dubbo:provider timeout="1000"/>
+
+**配置原则**
+
+**dubbo推荐在Provider上尽量多配置Consumer端属性：**
+
+1. 作为服务的提供者，比服务使用方更清楚服务性能参数，如调用的超时时间，合理的重试次数，等等
+2. 在Provider配置后，Consumer不配置则会使用Provider的配置值，即Provider配置可以作为Consumer的缺省值。否则，Consumer会使用Consumer端的全局设置，这对于Provider不可控的，并且往往是不合理的
+
+**配置的覆盖规则:**
+
+**1）、精确优先 (方法级优先，接口级次之，全局配置再次之)**
+
+**2）、消费者设置优先(如果级别一样，则消费方优先，服务提供方次之)**
+
+备住:这里以timeout属性为例
+
+![](https://img-blog.csdnimg.cn/20190726161213171.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNjExNjc2,size_16,color_FFFFFF,t_70)
+
+**4. 版本号**
+
+当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。可以按照以下的步骤进行版本迁移：
+
+- 在低压力时间段，先升级一半提供者为新版本
+- 再将所有消费者升级为新版本
+- 然后将剩下的一半提供者升级为新版本
+
+		<!--服务端-->
+		<!--旧版本服务添加版本号-->
+	    <dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl" version="1.0.0" />
+	    <bean id="userServiceImpl" class="com.gmall.service.impl.UserServiceImpl"/>
+	
+		<!--新版本服务号添加版本号-->
+	    <dubbo:service interface="com.gmall.service.UserService" ref="userNewServiceImpl" version="2.0.0"/>
+	    <bean id="userNewServiceImpl" class="com.gmall.service.impl.UserNewServiceImpl"/>
+
+		<!--消费端-->
+		<!--可通过指定version来指定调用哪个版本的服务,也可以通过*来随机调用-->
+		<dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000" retries="3" version="2.0.0">
+
+[**5. 本地存根**](http://dubbo.apache.org/zh-cn/docs/user/demos/local-stub.html)
+
+远程服务后，客户端通常只剩下接口，而实现全在服务器端，但提供方有些时候想在客户端也执行部分逻辑，比如：做 ThreadLocal 缓存，提前验证参数，调用失败后伪造容错数据等等，此时就需要在 API 中带上 Stub，客户端生成 Proxy 实例，会把 Proxy 通过构造函数传给 Stub [1]，然后把 Stub 暴露给用户，Stub 可以决定要不要去调 Proxy。
+
+![](http://dubbo.apache.org/docs/zh-cn/user/sources/images/stub.jpg)
+
+	/**在消费端提供实现***/
+	public class UserServiceSub implements UserService {
+	    private final UserService userService;
+	
+	    // 构造函数传入真正的远程代理对象
+	    public UserServiceSub(UserService userService) {
+	        this.userService = userService;
+	    }
+	
+	    @Override
+	    public List<UserAddress> getUserAddressList(String userId) {
+	        System.out.println("UserServiceSub");
+	        // 此代码在客户端执行, 你可以在客户端做ThreadLocal本地缓存，或预先验证参数是否合法，等等
+	        if (!StringUtils.isEmpty(userId)){
+	           return userService.getUserAddressList(userId);
+	        }
+			// 可以容错，可以做任何AOP拦截事项
+	        return null;
 	    }
 	}
+
+在消费端spring配置文件中按以下方式
+
+	 <dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000" retries="3" version="2.0.0" stub="com.gmall.service.impl.UserServiceSub">
+
+1. Stub必须有可传入 Proxy 的构造函数
+
+2. 在interface旁边放一个Stub实现，它实现BarService接口，并有一个传入远程BarService实例的构造函数（在实际开发中Stub是放在公共的interface模块里的实现的,本地试验并没作处理）
