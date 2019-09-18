@@ -84,55 +84,15 @@ Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Ja
 
 **如果没有在配置中写dubbo.scan.base-package,还需要使用@EnableDubbo注解**
 
+[**boot-order-service-consumer消费端**](https://github.com/DragonChilde/Dubbo/tree/master/boot-order-service-consumer)
 
-**boot-order-service-consumer消费端**
+[**boot-user-service-provider服务端**](https://github.com/DragonChilde/Dubbo/tree/master/boot-user-service-provider)
 
+**SpringBoot与dubbo整合的三种方式：**
 
-
-**boot-user-service-provider服务端**
-
-application.properties
-
-	#端口号
-	server.port=9002
-
-	#是服务名，不能跟别的dubbo提供端重复
-	dubbo.application.name=boot-user-service-provider
-	#指定注册中心协议
-	dubbo.registry.protocol=zookeeper
-	#注册中心的地址加端口号
-	dubbo.registry.address=120.77.237.175:9181
-	#dubbo.protocol.port=20882
-	#分布式固定是dubbo,不要改
-	dubbo.protocol.name=dubbo
-	#注解方式要扫描的包
-	dubbo.scan.base-packages=com.dubbo.bootuserserviceprovider
-
-
-实现 Dubbo 服务提供方
-
-	package com.dubbo.bootuserserviceprovider.service.impl;
-
-	import com.alibaba.dubbo.config.annotation.Service;
-	import com.gmall.bean.UserAddress;
-	import com.gmall.service.UserService;
-	import org.springframework.stereotype.Component;
-	
-	import java.util.Arrays;
-	import java.util.List;
-
-	/**这里的dubbo @Service注解避免与spring的注解冲突，所以spring用了@Component指明***/
-	/**暴露服务接口**/
-	@Service
-	@Component
-	public class UserServiceImpl implements UserService {
-	    @Override
-	    public List<UserAddress> getUserAddressList(String userId) {
-	        UserAddress address1 = new UserAddress(1, "北京市昌平区宏福科技园综合楼3层", "1", "李老师", "010-56253825", "Y");
-	        UserAddress address2 = new UserAddress(2, "深圳市宝安区西部硅谷大厦B座3层（深圳分校）", "1", "王老师", "010-56253825", "N");
-	        return Arrays.asList(address1,address2);
-	    }
-	}
+1. 导入dubbo-starter，在application.properties配置属性，使用@Service【暴露服务】使用@Reference【引用服务】
+2. 保留dubbo xml配置文件;导入dubbo-starter，使用@ImportResource导入dubbo的配置文件即可
+3. 使用注解API的方式：将每一个组件手动创建到容器中,让dubbo来扫描其他的组件
 
 # Dubbo配置 #
 

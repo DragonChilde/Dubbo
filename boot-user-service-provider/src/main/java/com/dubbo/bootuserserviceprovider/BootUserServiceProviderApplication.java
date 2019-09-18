@@ -3,6 +3,8 @@ package com.dubbo.bootuserserviceprovider;
 import com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * 1、导入依赖；
@@ -17,7 +19,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 3）、使用注解API的方式：
  * 		将每一个组件手动创建到容器中,让dubbo来扫描其他的组件
  */
-@EnableDubbo
+/*@EnableDubbo*/
+/*@ImportResource(locations = "classpath:provider.xml")*/
+@EnableDubbo(scanBasePackages = "com.dubbo.bootuserserviceprovider")
 @SpringBootApplication
 public class BootUserServiceProviderApplication {
 

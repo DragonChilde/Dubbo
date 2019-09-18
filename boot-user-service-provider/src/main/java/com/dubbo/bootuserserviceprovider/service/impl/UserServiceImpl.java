@@ -12,7 +12,7 @@ import java.util.List;
  * @author Lee
  * @create 2019-09-14 21:23
  */
-@Service
+//@Service
 @Component
 public class UserServiceImpl implements UserService {
     @Override
