@@ -1,6 +1,6 @@
 **boot-user-service-provider服务端**
 
-**整合方式一**
+**整合方式一(properties配置方式)**
 
 application.properties
 
@@ -57,7 +57,7 @@ application.properties
 	
 	}
 
-**整合方式二**
+**整合方式二(使用xml配置文件方式)**
 
 保留dubbo xml配置文件(provider.xml)
 
@@ -116,4 +116,83 @@ application.properties
 	
 	}
 
-**整合方式三**
+**整合方式三(API注解方式)**
+
+定义springboot配置类
+
+	@Configuration
+	public class MyDubboConfig {
+	
+	    @Bean
+	    public ApplicationConfig applicationConfig() {
+	        ApplicationConfig applicationConfig = new ApplicationConfig();
+	        applicationConfig.setName("boot-user-service-provider");
+	        return applicationConfig;
+	    }
+	
+	    @Bean
+	    public RegistryConfig registryConfig() {
+	        RegistryConfig registryConfig = new RegistryConfig();
+	        registryConfig.setProtocol("zookeeper");
+	        registryConfig.setAddress("120.77.237.175:9181");
+	        return registryConfig;
+	    }
+	
+	    @Bean
+	    public ProtocolConfig protocolConfig() {
+	        ProtocolConfig protocolConfig = new ProtocolConfig();
+	        protocolConfig.setName("dubbo");
+	        protocolConfig.setPort(20882);
+	        return protocolConfig;
+	    }
+	
+	    @Bean
+	    public ServiceConfig<UserService> userServiceConfig(UserService userService){
+	        ServiceConfig<UserService> serviceConfig = new ServiceConfig<>();
+	        serviceConfig.setInterface(UserService.class);
+	        serviceConfig.setRef(userService);
+	        serviceConfig.setVersion("1.0.0");
+	
+	        //配置每一个method的信息
+	        MethodConfig methodConfig = new MethodConfig();
+	        methodConfig.setName("getUserAddressList");
+	        methodConfig.setTimeout(1000);
+	
+	        //将method的设置关联到service配置中
+	        List<MethodConfig> methods = new ArrayList<>();
+	        methods.add(methodConfig);
+	        serviceConfig.setMethods(methods);
+	
+	        //ProviderConfig
+	        //MonitorConfig
+	
+	        return serviceConfig;
+	    }
+	}
+
+
+服务层
+		
+		@Service/**Dubbo暴露服务**/
+		@Component
+		public class UserServiceImpl implements UserService {
+		    @Override
+		    public List<UserAddress> getUserAddressList(String userId) {
+		        UserAddress address1 = new UserAddress(1, "北京市昌平区宏福科技园综合楼3层", "1", "李老师", "010-56253825", "Y");
+		        UserAddress address2 = new UserAddress(2, "深圳市宝安区西部硅谷大厦B座3层（深圳分校）", "1", "王老师", "010-56253825", "N");
+		        return Arrays.asList(address1,address2);
+		    }
+		}
+
+启动服务
+
+	/**开启Dubbo服务自动扫包**/
+	@EnableDubbo(scanBasePackages = "com.dubbo.bootuserserviceprovider")
+	@SpringBootApplication
+	public class BootUserServiceProviderApplication {
+	
+	    public static void main(String[] args) {
+	        SpringApplication.run(BootUserServiceProviderApplication.class, args);
+	    }
+	
+	}

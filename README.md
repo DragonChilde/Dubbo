@@ -230,3 +230,100 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 1. Stub必须有可传入 Proxy 的构造函数
 
 2. 在interface旁边放一个Stub实现，它实现BarService接口，并有一个传入远程BarService实例的构造函数（在实际开发中Stub是放在公共的interface模块里的实现的,本地试验并没作处理）
+
+
+# 高可用 #
+
+**1. zookeeper宕机与dubbo直连**
+
+[官网直连](http://dubbo.apache.org/zh-cn/docs/user/demos/explicit-target.html)
+
+现象：zookeeper注册中心宕机，还可以消费dubbo暴露的服务。
+
+健壮性
+
+- 监控中心宕掉不影响使用，只是丢失部分采样数据
+- 数据库宕掉后，注册中心仍能通过缓存提供服务列表查询，但不能注册新服务
+- 注册中心对等集群，任意一台宕掉后，将自动切换到另一台
+- **注册中心全部宕掉后，服务提供者和服务消费者仍能通过本地缓存通讯**
+- 服务提供者无状态，任意一台宕掉后，不影响使用
+- 服务提供者全部宕掉后，服务消费者应用将无法使用，并无限次重连等待服务提供者恢复
+
+高可用：通过设计，减少系统不能提供服务的时间；
+
+
+	/**当注册中心宕机时,消费者可以指定Reference的url地址直连服务，而不需要经过注册中心**/
+	@Service
+	public class OrderServiceImpl implements OrderService {
+	    @Reference(url="localhost:20882")//Dubbo直连
+	    UserService userService;
+	    @Override
+	    public List<UserAddress> initOrder(String userId) {
+	        List<UserAddress> addressList = userService.getUserAddressList(userId);
+	        for (UserAddress userAddress : addressList) {
+	            System.out.println(userAddress.getUserAddress());
+	        }
+	        return addressList;
+	    }
+	}
+
+**2. 集群下dubbo负载均衡配置**
+
+[负载均衡策略](http://dubbo.apache.org/zh-cn/docs/user/demos/loadbalance.html)
+
+**Random LoadBalance**
+
+![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-12-7/77722327.jpg)
+
+- **随机**，按权重设置随机概率。
+- 在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。
+
+**RoundRobin LoadBalance**
+
+![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-12-7/97933247.jpg)
+
+- **轮循**，按公约后的权重设置轮循比率。
+- 存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。
+
+**LeastActive LoadBalance**
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618221452338-1832708192.png)
+
+- **最少活跃调用数**，相同活跃数的随机，活跃数指调用前后计数差。
+- 使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。
+
+**ConsistentHash LoadBalance**
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618221549255-85947530.png)
+
+- **一致性** Hash，相同参数的请求总是发到同一提供者。
+- 当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。
+- 算法参见：http://en.wikipedia.org/wiki/Consistent_hashing
+- 缺省只对第一个参数 Hash，如果要修改，请配置 <dubbo:parameter key="hash.arguments" value="0,1" />
+- 缺省用 160 份虚拟节点，如果要修改，请配置 <dubbo:parameter key="hash.nodes" value="320" />
+
+可以通过配置文件方式或注解方式进行配置
+
+	/**四个策略模式类***/
+	AbstractLoadBalance
+			|-RandomLoadBalance
+			|-ConsistentHashLoadBalance
+			|-LeastActiveLoadBalance
+			|-RoundRobinLoadBalance
+
+	
+以注解为例(在消费者实现配置):
+
+	@Service
+	public class OrderServiceImpl implements OrderService {
+	    @Reference(loadbalance="random")//默认是random随机调用模式
+	    UserService userService;
+	    @Override
+	    public List<UserAddress> initOrder(String userId) {
+	        List<UserAddress> addressList = userService.getUserAddressList(userId);
+	        for (UserAddress userAddress : addressList) {
+	            System.out.println(userAddress.getUserAddress());
+	        }
+	        return addressList;
+	    }
+	}

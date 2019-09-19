@@ -14,7 +14,8 @@ import java.util.List;
  */
 @Service
 public class OrderServiceImpl implements OrderService {
-    @Reference
+    /*@Reference(url="localhost:20882")*/
+    @Reference(loadbalance="random")//默认是random模式
     UserService userService;
     @Override
     public List<UserAddress> initOrder(String userId) {
