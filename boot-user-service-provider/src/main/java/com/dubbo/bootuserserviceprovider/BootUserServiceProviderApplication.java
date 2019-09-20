@@ -3,6 +3,9 @@ package com.dubbo.bootuserserviceprovider;
 import com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
+import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
@@ -22,6 +25,7 @@ import org.springframework.context.annotation.ImportResource;
 /*@EnableDubbo*/
 /*@ImportResource(locations = "classpath:provider.xml")*/
 @EnableDubbo(scanBasePackages = "com.dubbo.bootuserserviceprovider")
+@EnableHystrix
 @SpringBootApplication
 public class BootUserServiceProviderApplication {
 

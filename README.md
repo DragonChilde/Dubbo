@@ -327,3 +327,227 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 	        return addressList;
 	    }
 	}
+
+**[3. 服务降级](http://dubbo.apache.org/zh-cn/docs/user/demos/service-downgrade.html)**
+
+什么是服务降级？
+
+当服务器压力剧增的情况下，根据实际业务情况及流量，对一些服务和页面有策略的不处理或换种简单的方式处理，从而释放服务器资源以保证核心交易正常运作或高效运作。
+
+可以通过服务降级功能临时屏蔽某个出错的非关键服务，并定义降级后的返回策略。
+
+向注册中心写入动态配置覆盖规则：
+
+	RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+	Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://10.20.153.10:2181"));
+	registry.register(URL.valueOf("override://0.0.0.0/com.foo.BarService?category=configurators&dynamic=false&application=foo&mock=force:return+null"));
+
+其中：
+
+- mock=force:return+null 表示消费方对该服务的方法调用都直接返回 null 值，不发起远程调用。用来屏蔽不重要服务不可用时对调用方的影响。
+- 还可以改为 mock=fail:return+null 表示消费方对该服务的方法调用在失败后，再返回 null 值，不抛异常。用来容忍不重要服务不稳定时对调用方的影响。
+
+同时也可以在Dubbo-admin的后台进行设置
+
+这两种方式分别对应下图的屏蔽与容错(消费者端)：
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618231429507-699507010.png)
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618231530665-1963612305.png)
+
+**[4. 集群容错](http://dubbo.apache.org/zh-cn/docs/user/demos/fault-tolerent-strategy.html)**
+
+在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
+
+集群容错模式
+
+**Failover Cluster**
+
+失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次)。	
+
+	重试次数配置如下：
+	<dubbo:service retries="2" />
+	或
+	<dubbo:reference retries="2" />
+	或
+	<dubbo:reference>
+	    <dubbo:method name="findFoo" retries="2" />
+	</dubbo:reference>
+
+**Failfast Cluster**
+
+快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。
+
+**Failsafe Cluster**
+
+失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。
+
+**Failback Cluster**
+
+失败自动恢复，后台记录失败请求，定时重发。通常用于消息通知操作。
+
+**Forking Cluster**
+
+并行调用多个服务器，只要一个成功即返回。通常用于实时性要求较高的读操作，但需要浪费更多服务资源。可通过 forks="2" 来设置最大并行数。
+
+**Broadcast Cluster**
+
+广播调用所有提供者，逐个调用，任意一台报错则报错 [2]。通常用于通知所有提供者更新缓存或日志等本地资源信息。
+
+**集群模式配置**
+
+按照以下示例在服务提供方和消费方配置集群模式
+
+	<dubbo:service cluster="failsafe" />
+	或
+	<dubbo:reference cluster="failsafe" />
+
+**整合hystrix(dubbo支持此容错，并且SpringCloud也有使用)**
+
+Hystrix 旨在通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。Hystrix具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包，以及监控和配置等功能
+
+1. 配置spring-cloud-starter-netflix-hystrix
+
+spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖
+
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>
+			spring-cloud-starter-netflix-hystrix
+		</artifactId>
+	</dependency>
+
+	 <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Finchley.SR1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+然后在消费和服务的Application类上增加@EnableHystrix来启用hystrix starter：
+
+	@EnableHystrix
+	@SpringBootApplication
+	public class BootUserServiceProviderApplication {
+	
+	    public static void main(String[] args) {
+	        SpringApplication.run(BootUserServiceProviderApplication.class, args);
+	    }
+	
+	}
+
+2. 配置Provider端
+
+在Dubbo的Provider上增加@HystrixCommand配置，这样子调用就会经过Hystrix代理。
+
+	@Service
+	@Component
+	public class UserServiceImpl implements UserService {
+	
+	    @HystrixCommand
+	    @Override
+	    public List<UserAddress> getUserAddressList(String userId) {
+	        UserAddress address1 = new UserAddress(1, "北京市昌平区宏福科技园综合楼3层", "1", "李老师", "010-56253825", "Y");
+	        UserAddress address2 = new UserAddress(2, "深圳市宝安区西部硅谷大厦B座3层（深圳分校）", "1", "王老师", "010-56253825", "N");
+	
+	        if(Math.random()>0.5)
+	        {
+	            throw new RuntimeException();
+	        }
+	        return Arrays.asList(address1,address2);
+	    }
+	}
+
+3. 配置Consumer端
+
+		@Service
+		public class OrderServiceImpl implements OrderService {
+		    /*@Reference(url="localhost:20882")*/
+		    @Reference(loadbalance="random")//默认是random模式
+		    UserService userService;
+		
+		    @HystrixCommand(fallbackMethod = "errorOrder")
+		    @Override
+		    public List<UserAddress> initOrder(String userId) {
+		        List<UserAddress> addressList = userService.getUserAddressList(userId);
+		        for (UserAddress userAddress : addressList) {
+		            System.out.println(userAddress.getUserAddress());
+		        }
+		        return addressList;
+		    }
+		
+		    public List<UserAddress> errorOrder(String userId) {
+		
+		        return Arrays.asList(new UserAddress(10, "测试", "10", "测试", "测试", "Y"));
+		    }
+		}
+
+
+
+# Dubbo原理 #
+
+**RPC原理**
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619212040778-1687490942.png)
+
+一次完整的RPC调用流程（同步调用，异步另说）如下：
+ 
+1. 服务消费方（client）调用以本地调用方式调用服务； 
+2. client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体； 
+3. client stub找到服务地址，并将消息发送到服务端； 
+4. server stub收到消息后进行解码； 
+5. server stub根据解码结果调用本地的服务； 
+6. 本地服务执行并将结果返回给server stub； 
+7. server stub将返回结果打包成消息并发送至消费方； 
+8. client stub接收到消息，并进行解码； 
+9. 服务消费方得到最终结果。
+
+RPC框架的目标就是要2~8这些步骤都封装起来，这些细节对用户来说是透明的，不可见的。
+
+**Dubbo用的是netty通信**
+
+**netty通信原理**
+
+**netty通信使用的是NIO**
+
+Netty是一个异步事件驱动的网络应用程序框架， 用于快速开发可维护的高性能协议服务器和客户端。它极大地简化并简化了TCP和UDP套接字服务器等网络编程。
+
+BIO：(Blocking IO)(阻塞式IO)
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619213058939-1119810457.png)
+
+NIO (Non-Blocking IO)
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619213130802-1768767677.png)
+
+Selector 一般称 为选择器 ，也可以翻译为 多路复用器，
+
+Connect（连接就绪）、Accept（接受就绪）、Read（读就绪）、Write（写就绪）
+
+Netty基本原理：
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619213311161-400480476.png)
+
+**Dubbo原理**
+
+[框架设计](http://dubbo.apache.org/zh-cn/docs/dev/design.html)
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619214635606-1414855940.png)
+
+- **config 配置层**：对外配置接口，以 ServiceConfig, ReferenceConfig 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类
+- **proxy 服务代理层**：服务接口透明代理，生成服务的客户端 Stub 和服务器端 Skeleton, 以 ServiceProxy 为中心，扩展接口为 ProxyFactory
+- **registry 注册中心层**：封装服务地址的注册与发现，以服务 URL 为中心，扩展接口为 RegistryFactory, Registry, RegistryService
+- **cluster 路由层**：封装多个提供者的路由及负载均衡，并桥接注册中心，以 Invoker 为中心，扩展接口为 Cluster, Directory, Router, LoadBalance
+- **monitor 监控层**：RPC 调用次数和调用时间监控，以 Statistics 为中心，扩展接口为 MonitorFactory, Monitor, MonitorService
+- **protocol 远程调用层**：封装 RPC 调用，以 Invocation, Result 为中心，扩展接口为 Protocol, Invoker, Exporter
+- **exchange 信息交换层**：封装请求响应模式，同步转异步，以 Request, Response 为中心，扩展接口为 Exchanger, ExchangeChannel, ExchangeClient, ExchangeServer
+- **transport 网络传输层**：抽象 mina 和 netty 为统一接口，以 Message 为中心，扩展接口为 Channel, Transporter, Client, Server, Codec
+- **serialize 数据序列化层**：可复用的一些工具，扩展接口为 Serialization, ObjectInput, ObjectOutput, ThreadPool
+
+
+https://www.cnblogs.com/alimayun/p/11055408.html
