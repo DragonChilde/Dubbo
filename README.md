@@ -549,5 +549,30 @@ Netty基本原理：
 - **transport 网络传输层**：抽象 mina 和 netty 为统一接口，以 Message 为中心，扩展接口为 Channel, Transporter, Client, Server, Codec
 - **serialize 数据序列化层**：可复用的一些工具，扩展接口为 Serialization, ObjectInput, ObjectOutput, ThreadPool
 
+**dubbo原理-启动解析、加载配置信息**
 
-https://www.cnblogs.com/alimayun/p/11055408.html
+
+Spring解析器所先进入BeanDefinitionParser下的DubboBeanDefinitionParser
+
+		BeanDefinitionParser
+				|-DubboBeanDefinitionParser
+
+![](https://raw.githubusercontent.com/DragonChilde/MarkdownPhotos/master/photos/QQ%E5%9B%BE%E7%89%8720190921173835.png)
+
+图中看到在执行DubboBeanDefinitionParser前，会先进入DubboNamespaceHandler里把定义好的init方法各次传到构造方法的beanClass
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619214835680-1212589898.png)
+
+**注意:这里service服务调的就是服务暴露的ServiceBean**
+
+**dubbo原理-服务暴露**
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619214929822-1283240731.png)
+
+**dubbo原理-服务引用**
+
+![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619215010424-1117546909.png)
+
+**dubbo原理-服务调用**
+
+![](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo-extension.jpg)
