@@ -1,6 +1,8 @@
-# Dubbo #
+<a href="http://120.77.237.175:9080/photos/dubbo/">Dubbo</a>
 
-**分布式基础理论**
+# 分布式基础理论 #
+
+## 什么是分布式系统 ##
 
 分布式系统原理与范型定义：“分布式系统是若干独立计算机的集合，这些计算机对于用户来说就像单个相关系统”
 
@@ -8,7 +10,9 @@
 
 随着互联网的发展，网站应用的规模不断扩大，常规的垂直应用架构已无法应对，分布式服务架构以及流动计算架构势在必行，亟需一个治理系统确保架构有条不紊的演进。
 
-![](https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1568181254364&di=0e7f265f2354787f8a943856d3c0ee1e&imgtype=0&src=http%3A%2F%2Fwww.pc-fly.com%2Fuploads%2Fallimg%2F20170502%2F1493658203638_2.jpg)
+## 发展演变 ##
+
+![](http://120.77.237.175:9080/photos/dubbo/01.png)
 
 *单一应用架构*
 
@@ -22,26 +26,31 @@
 。
 缺点： 公用模块无法重复利用，开发性的浪费
 
+## RPC ##
+
 **什么叫RPC**
 
 RPC【Remote Procedure Call】是指远程过程调用，是一种进程间通信方式，他是一种技术的思想，而不是规范。它允许程序调用另一个地址空间（通常是共享网络的另一台机器上）的过程或函数，而不用程序员显式编码这个远程调用的细节。即程序员无论是调用本地的还是远程的函数，本质上编写的调用代码基本相同。
 
 **RPC基本原理**
 
-![](https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1568181774260&di=5d366ea9c7249fbc8071dfeb907268b2&imgtype=0&src=http%3A%2F%2Fpic2.zhimg.com%2Fv2-7f0d1d89c641d582c6873af571eb95b5_b.jpg)
+![](http://120.77.237.175:9080/photos/dubbo/02.png)
 
-![](https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1568181846920&di=1c05f889edbde13ee33e2dd1f8c0677a&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20180528%2F8482d98b927e4ee799df9400c91399f8.png)
+![](http://120.77.237.175:9080/photos/dubbo/03.png)
 
 **RPC两个核心模块：通讯，序列化。**
 
 # dubbo核心概念 #
 
+## 简介 ##
+
 Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Java RPC框架，它提供了三大核心能力：面向接口的远程方法调用，智能容错和负载均衡，以及服务自动注册和发现。
 
 [http://dubbo.apache.org/zh-cn/](http://dubbo.apache.org/zh-cn/)
 
-![](http://dubbo.apache.org/img/architecture.png)
+## 基本概念 ##
 
+![](http://120.77.237.175:9080/photos/dubbo/04.png)
 
 **服务提供者（Provider）**：暴露服务的服务提供方，服务提供者在启动时，向注册中心注册自己提供的服务。
 
@@ -61,7 +70,7 @@ Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Ja
 - 服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。
 
 
-**整合Spring工程架构**
+# 整合Spring工程架构 #
 
 [**gmall-interface(公共接口层)**](https://github.com/DragonChilde/Dubbo/tree/master/gmall-interface)
 
@@ -96,9 +105,9 @@ Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Ja
 
 # Dubbo配置 #
 
-**1. 配置原则**
+## 配置原则 ##
 
-![](https://img-blog.csdnimg.cn/20181031220111268.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3l6MzU3ODIzNjY5,size_16,color_FFFFFF,t_70)
+![](http://120.77.237.175:9080/photos/dubbo/05.jpg)
 
 - JVM 启动 -D 参数优先，这样可以使用户在部署和启动时进行参数重写，比如在启动时需改变协议的端口。
 - XML 次之，如果在 XML 中有配置，则 dubbo.properties 中的相应配置项无效。
@@ -121,7 +130,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 		<dubbo:registry check="false" />
 	
-**2. 重试次数**
+## 重试次数 ##
 
 失败自动切换，当出现失败，重试其它服务器，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次，一共连接三次)
 
@@ -135,7 +144,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 **假如同时有多个服务方(不同的端口),这时重试不会只连同一个服务端，会多个服务端都尝试连接**
 
-**3. 超时时间**
+## 超时时间 ##
 
 由于网络或服务端不可靠，会导致调用出现一种不确定的中间状态（超时）。为了避免超时导致客户端资源（线程）挂起耗尽，必须设置超时时间。
 
@@ -173,9 +182,9 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 备住:这里以timeout属性为例
 
-![](https://img-blog.csdnimg.cn/20190726161213171.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNjExNjc2,size_16,color_FFFFFF,t_70)
+![](http://120.77.237.175:9080/photos/dubbo/06.jpg)
 
-**4. 版本号**
+## 版本号 ##
 
 当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。可以按照以下的步骤进行版本迁移：
 
@@ -200,7 +209,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 远程服务后，客户端通常只剩下接口，而实现全在服务器端，但提供方有些时候想在客户端也执行部分逻辑，比如：做 ThreadLocal 缓存，提前验证参数，调用失败后伪造容错数据等等，此时就需要在 API 中带上 Stub，客户端生成 Proxy 实例，会把 Proxy 通过构造函数传给 Stub [1]，然后把 Stub 暴露给用户，Stub 可以决定要不要去调 Proxy。
 
-![](http://dubbo.apache.org/docs/zh-cn/user/sources/images/stub.jpg)
+![](http://120.77.237.175:9080/photos/dubbo/07.jpg)
 
 	/**在消费端提供实现***/
 	public class UserServiceSub implements UserService {
@@ -234,7 +243,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 # 高可用 #
 
-**1. zookeeper宕机与dubbo直连**
+## zookeeper宕机与dubbo直连 ##
 
 [官网直连](http://dubbo.apache.org/zh-cn/docs/user/demos/explicit-target.html)
 
@@ -267,34 +276,34 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 	    }
 	}
 
-**2. 集群下dubbo负载均衡配置**
+## 集群下dubbo负载均衡配置 ##
 
 [负载均衡策略](http://dubbo.apache.org/zh-cn/docs/user/demos/loadbalance.html)
 
 **Random LoadBalance**
 
-![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-12-7/77722327.jpg)
+![](http://120.77.237.175:9080/photos/dubbo/08.jpg)
 
 - **随机**，按权重设置随机概率。
 - 在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。
 
 **RoundRobin LoadBalance**
 
-![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-12-7/97933247.jpg)
+![](http://120.77.237.175:9080/photos/dubbo/09.jpg)
 
 - **轮循**，按公约后的权重设置轮循比率。
 - 存在慢的提供者累积请求的问题，比如：第二台机器很慢，但没挂，当请求调到第二台时就卡在那，久而久之，所有请求都卡在调到第二台上。
 
 **LeastActive LoadBalance**
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618221452338-1832708192.png)
+![](http://120.77.237.175:9080/photos/dubbo/10.png)
 
 - **最少活跃调用数**，相同活跃数的随机，活跃数指调用前后计数差。
 - 使慢的提供者收到更少请求，因为越慢的提供者的调用前后计数差会越大。
 
 **ConsistentHash LoadBalance**
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618221549255-85947530.png)
+![](http://120.77.237.175:9080/photos/dubbo/11.png)
 
 - **一致性** Hash，相同参数的请求总是发到同一提供者。
 - 当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。
@@ -328,9 +337,11 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 	    }
 	}
 
-**[3. 服务降级](http://dubbo.apache.org/zh-cn/docs/user/demos/service-downgrade.html)**
+## 整合hystrix，服务熔断与降级处理 ##
 
-什么是服务降级？
+### 服务降级 ###
+
+**[服务降级](http://dubbo.apache.org/zh-cn/docs/user/demos/service-downgrade.html)**
 
 当服务器压力剧增的情况下，根据实际业务情况及流量，对一些服务和页面有策略的不处理或换种简单的方式处理，从而释放服务器资源以保证核心交易正常运作或高效运作。
 
@@ -355,7 +366,9 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 ![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190618231530665-1963612305.png)
 
-**[4. 集群容错](http://dubbo.apache.org/zh-cn/docs/user/demos/fault-tolerent-strategy.html)**
+### 集群容错 ###
+
+**[集群容错](http://dubbo.apache.org/zh-cn/docs/user/demos/fault-tolerent-strategy.html)**
 
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 
@@ -401,6 +414,8 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 	<dubbo:service cluster="failsafe" />
 	或
 	<dubbo:reference cluster="failsafe" />
+
+### 整合hystrix ###
 
 **整合hystrix(dubbo支持此容错，并且SpringCloud也有使用)**
 
@@ -491,9 +506,9 @@ spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖
 
 # Dubbo原理 #
 
-**RPC原理**
+## RPC原理 ##
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619212040778-1687490942.png)
+![](http://120.77.237.175:9080/photos/dubbo/12.png)
 
 一次完整的RPC调用流程（同步调用，异步另说）如下：
  
@@ -519,11 +534,11 @@ Netty是一个异步事件驱动的网络应用程序框架， 用于快速开�
 
 BIO：(Blocking IO)(阻塞式IO)
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619213058939-1119810457.png)
+![](http://120.77.237.175:9080/photos/dubbo/13.png)
 
 NIO (Non-Blocking IO)
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619213130802-1768767677.png)
+![](http://120.77.237.175:9080/photos/dubbo/14.png)
 
 Selector 一般称 为选择器 ，也可以翻译为 多路复用器，
 
@@ -531,13 +546,15 @@ Connect（连接就绪）、Accept（接受就绪）、Read（读就绪）、Wri
 
 Netty基本原理：
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619213311161-400480476.png)
+![](http://120.77.237.175:9080/photos/dubbo/15.png)
 
-**Dubbo原理**
+## Dubbo原理 ##
+
+### 框架设计 ###
 
 [框架设计](http://dubbo.apache.org/zh-cn/docs/dev/design.html)
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619214635606-1414855940.png)
+![](http://120.77.237.175:9080/photos/dubbo/16.jpg)
 
 - **config 配置层**：对外配置接口，以 ServiceConfig, ReferenceConfig 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类
 - **proxy 服务代理层**：服务接口透明代理，生成服务的客户端 Stub 和服务器端 Skeleton, 以 ServiceProxy 为中心，扩展接口为 ProxyFactory
@@ -549,30 +566,29 @@ Netty基本原理：
 - **transport 网络传输层**：抽象 mina 和 netty 为统一接口，以 Message 为中心，扩展接口为 Channel, Transporter, Client, Server, Codec
 - **serialize 数据序列化层**：可复用的一些工具，扩展接口为 Serialization, ObjectInput, ObjectOutput, ThreadPool
 
-**dubbo原理-启动解析、加载配置信息**
-
+### dubbo原理-启动解析、加载配置信息 ###
 
 Spring解析器所先进入BeanDefinitionParser下的DubboBeanDefinitionParser
 
 		BeanDefinitionParser
 				|-DubboBeanDefinitionParser
 
-![](https://raw.githubusercontent.com/DragonChilde/MarkdownPhotos/master/photos/QQ%E5%9B%BE%E7%89%8720190921173835.png)
+![](http://120.77.237.175:9080/photos/dubbo/17.png)
 
 图中看到在执行DubboBeanDefinitionParser前，会先进入DubboNamespaceHandler里把定义好的init方法各次传到构造方法的beanClass
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619214835680-1212589898.png)
+![](http://120.77.237.175:9080/photos/dubbo/18.png)
 
 **注意:这里service服务调的就是服务暴露的ServiceBean**
 
-**dubbo原理-服务暴露**
+### dubbo原理-服务暴露 ###
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619214929822-1283240731.png)
+![](http://120.77.237.175:9080/photos/dubbo/19.jpg)
 
-**dubbo原理-服务引用**
+### dubbo原理-服务引用 ###
 
-![](https://img2018.cnblogs.com/blog/1377406/201906/1377406-20190619215010424-1117546909.png)
+![](http://120.77.237.175:9080/photos/dubbo/20.jpg)
 
-**dubbo原理-服务调用**
+### dubbo原理-服务调用 ###
 
-![](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo-extension.jpg)
+![](http://120.77.237.175:9080/photos/dubbo/21.jpg)
