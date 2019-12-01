@@ -148,7 +148,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 由于网络或服务端不可靠，会导致调用出现一种不确定的中间状态（超时）。为了避免超时导致客户端资源（线程）挂起耗尽，必须设置超时时间。
 
-**order-service-consumer(消费端)**
+### order-service-consumer(消费端) ###
 
     <!-- timeout默认是1000ms-->
 	<!--指定接口或者特定方法超时配置-->
@@ -158,7 +158,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 	<!--全局超时配置-->
     <dubbo:consumer timeout="1000"/>
 
-**user-service-provider(服务端)**
+### user-service-provider(服务端) ###
 
 	<!--指定接口或者特定方法超时配置-->
 	<dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl" timeout="1000">
@@ -167,7 +167,7 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 	<!--全局超时配置-->
     <dubbo:provider timeout="1000"/>
 
-**配置原则**
+### 配置原则 ###
 
 **dubbo推荐在Provider上尽量多配置Consumer端属性：**
 
@@ -526,7 +526,7 @@ RPC框架的目标就是要2~8这些步骤都封装起来，这些细节对用�
 
 **Dubbo用的是netty通信**
 
-**netty通信原理**
+## netty通信原理 ##
 
 **netty通信使用的是NIO**
 
