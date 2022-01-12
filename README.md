@@ -1,5 +1,3 @@
-<a href="http://120.77.237.175:9080/photos/dubbo/">Dubbo</a>
-
 # 分布式基础理论 #
 
 ## 什么是分布式系统 ##
@@ -81,11 +79,11 @@ Apache Dubbo (incubating) |ˈdʌbəʊ| 是一款高性能、轻量级的开源Ja
 [**整合SpringBoot**](https://github.com/apache/dubbo-spring-boot-project/blob/0.2.x/README_CN.md)
 
  	<!-- Dubbo Spring Boot Starter -->
-        <dependency>
-            <groupId>com.alibaba.boot</groupId>
-            <artifactId>dubbo-spring-boot-starter</artifactId>
-            <version>0.2.1</version>
-        </dependency>
+ 	    <dependency>
+ 	        <groupId>com.alibaba.boot</groupId>
+ 	        <artifactId>dubbo-spring-boot-starter</artifactId>
+ 	        <version>0.2.1</version>
+ 	    </dependency>
 
 注意:SpringBoot2.1.x以上要用0.2.1版本,以下用0.1.1版本
 
@@ -135,9 +133,9 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 失败自动切换，当出现失败，重试其它服务器，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次，一共连接三次)
 
 	    <!-- retries="":重试次数，不包含第一次调用，0代表不重试-->
-   		 <!-- 幂等（设置重试次数）【查询、删除、修改】、非幂等（不能设置重试次数）【新增】 -->
+		 <!-- 幂等（设置重试次数）【查询、删除、修改】、非幂等（不能设置重试次数）【新增】 -->
 	    <dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000" retries="3">
-        	<dubbo:method name="getUserAddressList" timeout="1000" retries="3"/>
+	    	<dubbo:method name="getUserAddressList" timeout="1000" retries="3"/>
 	    </dubbo:reference>
 	    <!--全局超时配置-->
 	    <dubbo:consumer timeout="1000" retries="3"/>
@@ -151,21 +149,21 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 ### order-service-consumer(消费端) ###
 
     <!-- timeout默认是1000ms-->
-	<!--指定接口或者特定方法超时配置-->
+    <!--指定接口或者特定方法超时配置-->
     <dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000">
         <dubbo:method name="getUserAddressList" timeout="5000"/>
     </dubbo:reference>
-	<!--全局超时配置-->
+    <!--全局超时配置-->
     <dubbo:consumer timeout="1000"/>
 
 ### user-service-provider(服务端) ###
 
 	<!--指定接口或者特定方法超时配置-->
 	<dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl" timeout="1000">
-        <dubbo:method name="getUserAddressList" timeout="5000"/>
-    </dubbo:service>
+	    <dubbo:method name="getUserAddressList" timeout="5000"/>
+	</dubbo:service>
 	<!--全局超时配置-->
-    <dubbo:provider timeout="1000"/>
+	<dubbo:provider timeout="1000"/>
 
 ### 配置原则 ###
 
@@ -194,13 +192,13 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 
 		<!--服务端-->
 		<!--旧版本服务添加版本号-->
-	    <dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl" version="1.0.0" />
-	    <bean id="userServiceImpl" class="com.gmall.service.impl.UserServiceImpl"/>
-	
+		<dubbo:service interface="com.gmall.service.UserService" ref="userServiceImpl" version="1.0.0" />
+		<bean id="userServiceImpl" class="com.gmall.service.impl.UserServiceImpl"/>
+		
 		<!--新版本服务号添加版本号-->
-	    <dubbo:service interface="com.gmall.service.UserService" ref="userNewServiceImpl" version="2.0.0"/>
-	    <bean id="userNewServiceImpl" class="com.gmall.service.impl.UserNewServiceImpl"/>
-
+		<dubbo:service interface="com.gmall.service.UserService" ref="userNewServiceImpl" version="2.0.0"/>
+		<bean id="userNewServiceImpl" class="com.gmall.service.impl.UserNewServiceImpl"/>
+		
 		<!--消费端-->
 		<!--可通过指定version来指定调用哪个版本的服务,也可以通过*来随机调用-->
 		<dubbo:reference id="userService" interface="com.gmall.service.UserService" timeout="1000" retries="3" version="2.0.0">
@@ -320,7 +318,8 @@ Dubbo 缺省会在启动时检查依赖的服务是否可用，不可用时会�
 			|-LeastActiveLoadBalance
 			|-RoundRobinLoadBalance
 
-	
+
+​	
 以注解为例(在消费者实现配置):
 
 	@Service
@@ -431,18 +430,18 @@ spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖
 			spring-cloud-starter-netflix-hystrix
 		</artifactId>
 	</dependency>
-
+	
 	 <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>Finchley.SR1</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	    <dependencies>
+	        <dependency>
+	            <groupId>org.springframework.cloud</groupId>
+	            <artifactId>spring-cloud-dependencies</artifactId>
+	            <version>Finchley.SR1</version>
+	            <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+	    </dependencies>
+	</dependencyManagement>
 
 然后在消费和服务的Application类上增加@EnableHystrix来启用hystrix starter：
 
@@ -511,7 +510,7 @@ spring boot官方提供了对hystrix的集成，直接在pom.xml里加入依赖
 ![](http://120.77.237.175:9080/photos/dubbo/12.png)
 
 一次完整的RPC调用流程（同步调用，异步另说）如下：
- 
+
 1. 服务消费方（client）调用以本地调用方式调用服务； 
 2. client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体； 
 3. client stub找到服务地址，并将消息发送到服务端； 
